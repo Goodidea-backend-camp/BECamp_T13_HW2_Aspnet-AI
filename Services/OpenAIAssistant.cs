@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Azure;
 using Azure.AI.OpenAI;
 using BECamp_T13_HW2_Aspnet_AI.Data;
 
@@ -62,6 +63,23 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             {
                 return "Post is valid.";
             }
+        }
+
+        internal async Task<string> Visualize(string prompt)
+        {
+            OpenAIClient client = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
+            Response<ImageGenerations> response = await client.GetImageGenerationsAsync(
+            new ImageGenerationOptions()
+            {
+                DeploymentName = "dall-e-2",
+                Prompt = prompt,
+                Size = ImageSize.Size256x256,
+                Quality = ImageGenerationQuality.Standard
+            });
+
+            ImageGenerationData generatedImage = response.Value.Data[0];
+
+            return generatedImage.Url.AbsoluteUri;
         }
     }
 }
