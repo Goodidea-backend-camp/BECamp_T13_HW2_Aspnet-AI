@@ -65,10 +65,33 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             }
         }
 
+        internal async Task<byte[]> TextToSpeech(string prompt)
+        {
+            OpenAIClient speechClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
+            StringBuilder speechPrompt = new StringBuilder($"Please roast {prompt} in a sarcastic tone");
+            // Generate the text of the roast first and then generate the speech of it.
+            string streamChatResponse = await StreamChatWithNonAzureOpenAI(speechClient, speechPrompt.ToString());
+            // The request options that control the behavior of a text-to-speech operation.
+            SpeechGenerationOptions speechOptions = new()
+            {
+                Input = streamChatResponse,
+                DeploymentName = "tts-1",
+                Voice = SpeechVoice.Alloy,
+                ResponseFormat = SpeechGenerationResponseFormat.Mp3,
+                Speed = 1.0f
+            };
+
+            Response<BinaryData> mp3Response = await speechClient.GenerateSpeechFromTextAsync(speechOptions);
+            // File.WriteAllBytes("{prompt}.mp3", mp3Response.Value.ToArray());
+
+            return mp3Response.Value.ToArray();
+        }
+
         internal async Task<string> Visualize(string prompt)
         {
-            OpenAIClient client = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
-            Response<ImageGenerations> response = await client.GetImageGenerationsAsync(
+            OpenAIClient visualizeClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
+            // The result of a successful image generation.
+            Response<ImageGenerations> imageGenerationResponse = await visualizeClient.GetImageGenerationsAsync(
             new ImageGenerationOptions()
             {
                 DeploymentName = "dall-e-2",
@@ -77,7 +100,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
                 Quality = ImageGenerationQuality.Standard
             });
 
-            ImageGenerationData generatedImage = response.Value.Data[0];
+            ImageGenerationData generatedImage = imageGenerationResponse.Value.Data[0];
 
             return generatedImage.Url.AbsoluteUri;
         }
