@@ -14,6 +14,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
                 .Build();
 
         static string nonAzureOpenAIApiKey = userSecretConfig["OpenAI:APIKey"];
+        static StringBuilder imageCompositePrompt = new StringBuilder();
 
         // The stream chat module using in text generation.
         async Task<string> StreamChatWithNonAzureOpenAI(OpenAIClient client, string prompt)
@@ -81,21 +82,23 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
                 Speed = 1.0f
             };
 
-            Response<BinaryData> mp3Response = await speechClient.GenerateSpeechFromTextAsync(speechOptions);
+            Response<BinaryData> speechResponse = await speechClient.GenerateSpeechFromTextAsync(speechOptions);
             // File.WriteAllBytes("{prompt}.mp3", mp3Response.Value.ToArray());
 
-            return mp3Response.Value.ToArray();
+            return speechResponse.Value.ToArray();
         }
 
         internal async Task<string> Visualize(string prompt)
         {
-            OpenAIClient visualizeClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
+            // Composite the continuous prompt from user.
+            imageCompositePrompt.Append(prompt);
+            OpenAIClient imageClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
             // The result of a successful image generation.
-            Response<ImageGenerations> imageGenerationResponse = await visualizeClient.GetImageGenerationsAsync(
+            Response<ImageGenerations> imageGenerationResponse = await imageClient.GetImageGenerationsAsync(
             new ImageGenerationOptions()
             {
                 DeploymentName = "dall-e-2",
-                Prompt = prompt,
+                Prompt = imageCompositePrompt.ToString(),
                 Size = ImageSize.Size256x256,
                 Quality = ImageGenerationQuality.Standard
             });
