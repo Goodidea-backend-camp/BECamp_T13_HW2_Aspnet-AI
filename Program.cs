@@ -20,8 +20,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();   // Transform the defalut route from single route(MVC) to attribute route(REST API).
 
 app.Run();

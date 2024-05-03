@@ -66,7 +66,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             }
         }
 
-        internal async Task<byte[]> TextToSpeech(string prompt)
+        internal async Task<string> TextToSpeech(string prompt)
         {
             OpenAIClient speechClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
             StringBuilder speechPrompt = new StringBuilder($"Please roast {prompt} in a sarcastic tone");
@@ -81,11 +81,13 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
                 ResponseFormat = SpeechGenerationResponseFormat.Mp3,
                 Speed = 1.0f
             };
-
+            // The result of a successful text-to-speech generation.
             Response<BinaryData> speechResponse = await speechClient.GenerateSpeechFromTextAsync(speechOptions);
-            // File.WriteAllBytes("{prompt}.mp3", mp3Response.Value.ToArray());
+            
+            string pathOfMP3 = $"./assets/{prompt}.mp3";
+            File.WriteAllBytes(pathOfMP3, speechResponse.Value.ToArray());
 
-            return speechResponse.Value.ToArray();
+            return pathOfMP3;
         }
 
         internal async Task<string> Visualize(string prompt)
