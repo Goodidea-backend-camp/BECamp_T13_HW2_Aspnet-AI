@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Azure;
 using Azure.AI.OpenAI;
-using BECamp_T13_HW2_Aspnet_AI.Data;
+using BECamp_T13_HW2_Aspnet_AI.Models;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Services
 {
@@ -106,7 +106,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             });
 
             ImageGenerationData generatedImage = imageGenerationResponse.Value.Data[0];
-
+            
             return generatedImage.Url.AbsoluteUri;
         }
     }
