@@ -3,18 +3,17 @@ using BECamp_T13_HW2_Aspnet_AI.Services;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
-    [ApiController]
     [Route("/")]
+    [ApiController]
     public class AIAssistantController : ControllerBase
     {
-
         OpenAIAssistant assistant = new OpenAIAssistant();
 
         [HttpPost("replies")]
-        public async Task<ActionResult> UserInputSpamCheck(string nickName)
+        public async Task<ActionResult> UserInputSpamCheck(string prompt)
         {
             // Wait for AI check if the nick name user input is spam or not.
-            string spamResponse = await assistant.SpamCheck(nickName);
+            string spamResponse = await assistant.SpamCheck(prompt);
             // The method automatically tranform the new object into json.
             return Ok(new { Response = spamResponse });
         }
