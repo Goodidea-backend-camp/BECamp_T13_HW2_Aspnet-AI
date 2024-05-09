@@ -1,7 +1,16 @@
+using BECamp_T13_HW2_Aspnet_AI.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<LoginContext>(
+    options => options.UseMySQL(builder.Configuration["MySQL:BECampT13HW2"])
+);
+builder.Services.AddDbContext<RegisterContext>(
+    options => options.UseMySQL(builder.Configuration["MySQL:BECampT13HW2"])
+);
 
 var app = builder.Build();
 
