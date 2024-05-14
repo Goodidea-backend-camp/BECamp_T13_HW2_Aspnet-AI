@@ -83,7 +83,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             };
             // The result of a successful text-to-speech generation.
             Response<BinaryData> speechResponse = await speechClient.GenerateSpeechFromTextAsync(speechOptions);
-            
+
             string pathOfMP3 = $"./assets/{prompt}.mp3";
             File.WriteAllBytes(pathOfMP3, speechResponse.Value.ToArray());
 
@@ -106,7 +106,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             });
 
             ImageGenerationData generatedImage = imageGenerationResponse.Value.Data[0];
-            
+
             return generatedImage.Url.AbsoluteUri;
         }
     }
