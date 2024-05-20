@@ -1,4 +1,5 @@
 using BECamp_T13_HW2_Aspnet_AI.Data;
+using BECamp_T13_HW2_Aspnet_AI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ builder.Services.AddDbContext<LoginContext>(
 builder.Services.AddDbContext<RegisterContext>(
     options => options.UseMySQL(builder.Configuration["MySQL:BECampT13HW2"])
 );
+
+// Use Interface to achieve dependency injection.
+builder.Services.AddScoped<IAIServices, OpenAIServices>();
 
 var app = builder.Build();
 

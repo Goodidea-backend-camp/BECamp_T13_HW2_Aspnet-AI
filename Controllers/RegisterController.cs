@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using BECamp_T13_HW2_Aspnet_AI.Data;
 using BECamp_T13_HW2_Aspnet_AI.Models;
 

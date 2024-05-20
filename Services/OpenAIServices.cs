@@ -6,11 +6,11 @@ using BECamp_T13_HW2_Aspnet_AI.Models;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Services
 {
-    internal class OpenAIAssistant
+    internal class OpenAIServices : IAIServices
     {
         // To get the OpenAI API key that is stored in the user-secrets list.
         static IConfigurationRoot userSecretConfig = new ConfigurationBuilder()
-                .AddUserSecrets<OpenAIAssistant>()
+                .AddUserSecrets<OpenAIServices>()
                 .Build();
 
         static string nonAzureOpenAIApiKey = userSecretConfig["OpenAI:APIKey"];
@@ -43,7 +43,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             return response.ToString();
         }
 
-        internal async Task<string> SpamCheck(string prompt)
+        public async Task<string> SpamCheck(string prompt)
         {
             OpenAIClient spamClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
             // Build the prompt string to ask AI assistant.
@@ -66,7 +66,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             }
         }
 
-        internal async Task<string> TextToSpeech(string prompt)
+        public async Task<string> TextToSpeech(string prompt)
         {
             OpenAIClient speechClient = new OpenAIClient(nonAzureOpenAIApiKey, new OpenAIClientOptions());
             StringBuilder speechPrompt = new StringBuilder($"Please roast {prompt} in a sarcastic tone");
@@ -90,7 +90,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
             return pathOfMP3;
         }
 
-        internal async Task<string> Visualize(string prompt)
+        public async Task<string> Visualize(string prompt)
         {
             // Composite the continuous prompt from user.
             imageCompositePrompt.Append(prompt);
