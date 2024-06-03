@@ -14,6 +14,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             _assistant = assistant;
         }
 
+        // POST: /replies
         [HttpPost("replies")]
         public async Task<ActionResult> UserInputSpamCheck(string prompt)
         {
@@ -23,6 +24,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             return Ok(new { Response = spamResponse });
         }
 
+        // POST: /image
         [HttpPost("image")]
         public async Task<ActionResult> TextToImage(string prompt)
         {
@@ -32,6 +34,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             return Ok(new { Response = imageUriResponse });
         }
 
+        // POST: /roast
         [HttpPost("roast")]
         public async Task<ActionResult> TextToSpeech(string prompt)
         {

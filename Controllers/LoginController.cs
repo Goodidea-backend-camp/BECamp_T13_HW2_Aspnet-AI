@@ -15,7 +15,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             _logincontext = context;
         }
 
-        // POST: api/Login
+        // POST: /Login
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("login")]
         public async Task<ActionResult> PostLogin(Login login)

@@ -17,7 +17,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             _registercontext = context;
         }
 
-        // POST: api/Register
+        // POST: /Register
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("register")]
         public async Task<ActionResult<Register>> PostRegister(Register register)
@@ -39,14 +39,14 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
                     .Where(result => result.email == register.email)
                     .ToList();
 
-                if(registerUsernameResults.Count > 0)
+                if (registerUsernameResults.Count > 0)
                 {
-                    return Conflict(new {Response = "username has existed, please try another username"});
+                    return Conflict(new { Response = "username has existed, please try another username" });
                 }
 
-                if(registerEmailResults.Count > 0)
+                if (registerEmailResults.Count > 0)
                 {
-                    return Conflict(new {Response = "email has been used, please try another email"});
+                    return Conflict(new { Response = "email has been used, please try another email" });
                 }
 
                 _registercontext.Registers.Add(register);
