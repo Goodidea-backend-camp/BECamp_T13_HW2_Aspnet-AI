@@ -1,43 +1,103 @@
 using Microsoft.AspNetCore.Mvc;
 using BECamp_T13_HW2_Aspnet_AI.Services;
+using System.Text.Json.Nodes;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
     [Route("/")]
     [ApiController]
+    [Produces("application/json")]
     public class AIAssistantController : ControllerBase
     {
-        readonly IAIServices _assistant;
+        private readonly IAIServices _assistant;
 
         public AIAssistantController(IAIServices assistant)
         {
             _assistant = assistant;
         }
 
-        // POST: /replies
+        /// <summary>
+        /// Check whether username is spam or not.
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <returns>Success or failed with a message</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /replies
+        ///     {
+        ///        "prompt": "Hello, world!"
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="200">Returns a success message with response</response>
+        /// <response code="400">If the body or prompt's value is null</response>
         [HttpPost("replies")]
-        public async Task<ActionResult> UserInputSpamCheck(string prompt)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> UserInputSpamCheck([FromBody] JsonObject body)
         {
+            // Get the value from body which content-type is json.
+            string prompt = body["prompt"].ToString();
             // Wait for AI check if the nick name user input is spam or not.
             string spamResponse = await _assistant.SpamCheck(prompt);
             // The method automatically tranform the new object into json.
             return Ok(new { Response = spamResponse });
         }
 
-        // POST: /image
+        /// <summary>
+        /// Generate an image from user's about me.
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <returns>Success or failed with a message</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /image
+        ///     {
+        ///        "prompt": "A handsome man that coding with thinkpad."
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="200">Returns a success message with response</response>
+        /// <response code="400">If the body or prompt's value is null</response>
         [HttpPost("image")]
-        public async Task<ActionResult> TextToImage(string prompt)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> UserInputTextToImage([FromBody] JsonObject body)
         {
+            // Get the value from body which content-type is json.
+            string prompt = body["prompt"].ToString();
             // Wait for AI response a image uri.
             string imageUriResponse = await _assistant.Visualize(prompt);
             // Return a Uri by json format and let frontend open it with <img src="">.
             return Ok(new { Response = imageUriResponse });
         }
 
-        // POST: /roast
+        /// <summary>
+        /// Generate a speech mp3 file from user's prompt.
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <returns>Success or failed with a message</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /roast
+        ///     {
+        ///        "prompt": "Ruby on Rails"
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="200">Returns a success message with response</response>
+        /// <response code="400">If the body or prompt's value is null</response>
         [HttpPost("roast")]
-        public async Task<ActionResult> TextToSpeech(string prompt)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> UserInputTextToSpeech([FromBody] JsonObject body)
         {
+            // Get the value from body which content-type is json.
+            string prompt = body["prompt"].ToString();
+
             // Check the prompt length is required length or not.
             if (prompt.Length < 2 || prompt.Length > 50)
             {

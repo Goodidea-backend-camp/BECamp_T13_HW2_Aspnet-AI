@@ -6,24 +6,46 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
     [Route("/")]
     [ApiController]
+    [Produces("application/json")]
     public class LoginController : ControllerBase
     {
-        readonly LoginContext _logincontext;
+        private readonly LoginContext _logincontext;
 
         public LoginController(LoginContext context)
         {
             _logincontext = context;
         }
 
-        // POST: /Login
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Login with an exist account with username and password.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>Success or failed with a message</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /login
+        ///     {
+        ///        "username": "HelloUsername",
+        ///        "password": "HelloPassword"
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="200">Returns a success message</response>
+        /// <response code="401">If the value is null, empty, white space, or the account's data is wrong or not exist</response>
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> PostLogin(Login login)
         {
+            string loginErrorMessage = "Login failed. Username/Password is not exist or wrong.";
+            string loginSuccessMessage = "Login success.";
+
             // Check whether ussername/password is null, empty, or consists only of white-space.
             if (String.IsNullOrWhiteSpace(login.username) || String.IsNullOrWhiteSpace(login.password))
             {
-                return Unauthorized();
+                return Unauthorized(new {Response = loginErrorMessage});
             }
 
             try
@@ -34,10 +56,10 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 
                 if (loginResults.Count() == 0)
                 {
-                    return Unauthorized();
+                    return Unauthorized(new {Response = loginErrorMessage});
                 }
 
-                return Ok(login);
+                return Ok(new {Response = loginSuccessMessage});
             }
             catch (Exception)
             {

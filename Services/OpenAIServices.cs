@@ -9,15 +9,15 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
     internal class OpenAIServices : IAIServices
     {
         // To get the OpenAI API key that is stored in the user-secrets list.
-        static IConfigurationRoot userSecretConfig = new ConfigurationBuilder()
+        private static IConfigurationRoot userSecretConfig = new ConfigurationBuilder()
                 .AddUserSecrets<OpenAIServices>()
                 .Build();
 
-        static string nonAzureOpenAIApiKey = userSecretConfig["OpenAI:APIKey"];
-        static StringBuilder imageCompositePrompt = new StringBuilder();
+        private static string nonAzureOpenAIApiKey = userSecretConfig["OpenAI:APIKey"];
+        private static StringBuilder imageCompositePrompt = new StringBuilder();
 
         // The stream chat module using in text generation.
-        async Task<string> StreamChatWithNonAzureOpenAI(OpenAIClient client, string prompt)
+        public async Task<string> StreamChatWithNonAzureOpenAI(OpenAIClient client, string prompt)
         {
             // The configuration information for a chat completions request.
             ChatCompletionsOptions chatCompletionsOptions = new ChatCompletionsOptions()
