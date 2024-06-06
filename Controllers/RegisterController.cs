@@ -43,7 +43,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<Register>> PostRegister(Register register)
+        public async Task<ActionResult> PostRegister(Register register)
         {
             string registerErrorMessage = "Email/Username/Password is required.";
             string usernameHasExist = "Username has existed, please try another username.";
