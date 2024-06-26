@@ -29,4 +29,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="BECamp_T13_HW2_Aspnet-AI_Test" />
+  </ItemGroup>
+
 </Project>
