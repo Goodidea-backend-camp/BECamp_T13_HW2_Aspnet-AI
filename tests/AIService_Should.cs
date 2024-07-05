@@ -5,8 +5,8 @@ namespace BECamp_T13_HW2_Aspnet_AI
 {
     public class AIService_Should
     {
-        private string postIsValid = "Spam was detected.";
-        private string spamWasDetect = "Post is valid.";
+        private string spamWasDetect = "Spam was detected.";
+        private string postIsValid = "Post is valid.";
 
         [Fact]
         public async void SpamCheck_IsSpamDetect()
