@@ -13,11 +13,18 @@ namespace BECamp_T13_HW2_Aspnet_AI
         {
             IAIServices services = new OpenAIServices();
 
-            string fuckYouResult = await services.SpamCheck("Fuck You!");
+            string fuckYouResult = await services.SpamCheck("Fuck you!");
             string helloWorldResult = await services.SpamCheck("Hello, world!");
 
-            Assert.Equal(spamWasDetect, fuckYouResult);
-            Assert.Equal(postIsValid, helloWorldResult);
+            try
+            {
+                Assert.Equal(spamWasDetect, fuckYouResult);
+                Assert.Equal(postIsValid, helloWorldResult);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
