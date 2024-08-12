@@ -1,18 +1,17 @@
-using BECamp_T13_HW2_Aspnet_AI.Data;
-using BECamp_T13_HW2_Aspnet_AI.Services;
 using Microsoft.EntityFrameworkCore;
+using BECamp_T13_HW2_Aspnet_AI.Data;
+using BECamp_T13_HW2_Aspnet_AI.Models;
+using BECamp_T13_HW2_Aspnet_AI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration["MySQL:BECampT13HW2"] ?? throw new InvalidOperationException("Connection string 'UserContextConnection' not found.");
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-// To create a connection with MySQL by using EF Core. 
-builder.Services.AddDbContext<LoginContext>(
-    options => options.UseMySQL(builder.Configuration["MySQL:BECampT13HW2"])
-);
-builder.Services.AddDbContext<RegisterContext>(
-    options => options.UseMySQL(builder.Configuration["MySQL:BECampT13HW2"])
+// To create a connection with MySQL by using EF Core.
+builder.Services.AddDbContext<UserContext>(options =>
+    options.UseMySQL(connectionString)
 );
 
 // Use Interface to achieve dependency injection.

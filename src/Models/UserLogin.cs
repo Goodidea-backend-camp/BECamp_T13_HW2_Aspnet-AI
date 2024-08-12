@@ -4,10 +4,9 @@ namespace BECamp_T13_HW2_Aspnet_AI.Models
 {
     public class Login
     {
-        [Key]
+        [Required, EmailAddress]
+        public string Email { get; set; }
         [Required]
-        public string username { get; set; }
-        [Required]
-        public string password { get; set; }
+        public string Password { get; set; }
     }
 }
