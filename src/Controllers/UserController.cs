@@ -1,9 +1,12 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using BECamp_T13_HW2_Aspnet_AI.Data;
 using BECamp_T13_HW2_Aspnet_AI.Models;
-using Microsoft.EntityFrameworkCore;
+using BECamp_T13_HW2_Aspnet_AI.Services;
+using Mysqlx.Session;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
@@ -12,16 +15,44 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public UserController(UserContext context)
+        public UserController(UserContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(Register request)
+        {
+            if (_context.Users.Any(u => u.Email == request.Email))
+            {
+                return Conflict(new { Response = "User already existed." });
+            }
+
+            CreatePasswordHash(request.Password,
+                out byte[] passwordHash,
+                out byte[] passwordSalt);
+
+            User user = new User
+            {
+                Email = request.Email,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                VerificationToken = CreateRandomToken()
+            };
+
+            _context.Add(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(Register), new { Response = "User successfully created." });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(Login login)
+        public async Task<IActionResult> Login(Login request)
         {
-            User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
+            User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
             {
@@ -33,7 +64,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
                 return Unauthorized(new { Response = "User not verified." });
             }
 
-            if (!VerifyPasswordHash(login.Password, user.PasswordHash, user.PasswordSalt))
+            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
                 return Unauthorized(new { Response = "Login failed. Password is incorrect." });
             }
@@ -41,30 +72,59 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             return Ok(new { Response = "Login success." });
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(Register register)
+        [HttpPost("verify")]
+        public async Task<IActionResult> Verify(string verificationToken)
         {
-            if (_context.Users.Any(u => u.Email == register.Email))
+            User user = await _context.Users.FirstOrDefaultAsync(u => u.VerificationToken == verificationToken);
+
+            if (user == null)
             {
-                return Conflict(new { Response = "User already existed." });
+                return Unauthorized(new { Response = "Invalid token." });
             }
 
-            CreatePasswordHash(register.Password,
-                out byte[] passwordHash,
-                out byte[] passwordSalt);
-
-            User user = new User
-            {
-                Email = register.Email,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-                VerificationToken = CreateVerificationToken()
-            };
-
-            _context.Add(user);
+            user.VerifiedAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Register), new { Response = "User successfully created." });
+            return Ok(new { Response = "User verified." });
+        }
+
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return BadRequest(new { Reponse = "User not found." });
+            }
+
+            user.PasswordResetToken = CreateRandomToken();
+            user.ResetTokenExpires = DateTime.Now.AddDays(1);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Response = "You may reset your password." });
+        }
+
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPassword request)
+        {
+            User user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == request.PasswordResetToken);
+
+            if (user == null || user.ResetTokenExpires < DateTime.Now)
+            {
+                return BadRequest(new { Reponse = "Invalid Token." });
+            }
+
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            user.PasswordResetToken = null;
+            user.ResetTokenExpires = null;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Response = "Password successfully reset." });
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -86,7 +146,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             }
         }
 
-        private string CreateVerificationToken()
+        private string CreateRandomToken()
         {
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
         }
