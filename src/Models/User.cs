@@ -10,5 +10,8 @@ namespace BECamp_T13_HW2_Aspnet_AI.Models
         public DateTime? VerifiedAt { get; set; }
         public string? PasswordResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime RefreshTokenCreated { get; set; }
+        public DateTime RefreshTokenExpires { get; set; }
     }
 }

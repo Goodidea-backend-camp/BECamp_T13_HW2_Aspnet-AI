@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using BECamp_T13_HW2_Aspnet_AI.Data;
 using BECamp_T13_HW2_Aspnet_AI.Models;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
@@ -71,6 +72,11 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 
             string jwtToken = CreateJwtToken(user);
 
+            RefreshToken refreshToken = CreateRefreshToken();
+            SetRefreshToken(user, refreshToken);
+            
+            await _context.SaveChangesAsync();
+
             return Ok(jwtToken);
         }
 
@@ -90,7 +96,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             return Ok(new { Response = "User verified." });
         }
 
-        [HttpPost("forgotPassword")]
+        [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
             User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -107,7 +113,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             return Ok(new { Response = "You may reset your password." });
         }
 
-        [HttpPost("resetPassword")]
+        [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPassword request)
         {
             User user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == request.PasswordResetToken);
@@ -127,6 +133,33 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { Response = "Password successfully reset." });
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            string refreshToken = Request.Cookies["refreshToken"];
+
+            User user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid refresh token.");
+            }
+
+            if (user.ResetTokenExpires < DateTime.Now)
+            {
+                return Unauthorized("Refresh token expired.");
+            }
+
+            string jwtToken = CreateJwtToken(user);
+
+            RefreshToken newRefreshToken = CreateRefreshToken();
+            SetRefreshToken(user, newRefreshToken);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(jwtToken);
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -174,6 +207,31 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             string jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return jwt;
+        }
+
+        private RefreshToken CreateRefreshToken()
+        {
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                TokenCreated = DateTime.Now,
+                TokenExpires = DateTime.Now.AddDays(1)
+            };
+        }
+
+        private void SetRefreshToken(User user, RefreshToken newRefreshToken)
+        {
+            CookieOptions cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newRefreshToken.TokenExpires
+            };
+
+            Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+
+            user.RefreshToken = newRefreshToken.Token;
+            user.RefreshTokenCreated = newRefreshToken.TokenCreated;
+            user.RefreshTokenExpires = newRefreshToken.TokenExpires;
         }
     }
 }
