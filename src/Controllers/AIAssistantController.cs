@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BECamp_T13_HW2_Aspnet_AI.Models;
 using BECamp_T13_HW2_Aspnet_AI.Services;
-using System.Text.Json.Nodes;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
