@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using BECamp_T13_HW2_Aspnet_AI.Data;
-using BECamp_T13_HW2_Aspnet_AI.Models;
 using BECamp_T13_HW2_Aspnet_AI.Services;
 
 var builder = WebApplication.CreateBuilder(args);

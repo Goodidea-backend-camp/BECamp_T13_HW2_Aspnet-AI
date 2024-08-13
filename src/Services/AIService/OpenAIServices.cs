@@ -13,7 +13,7 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
                 .AddUserSecrets<OpenAIServices>()
                 .Build();
 
-        private static string nonAzureOpenAIApiKey = userSecretConfig["OpenAI:APIKey"];
+        private static string nonAzureOpenAIApiKey = userSecretConfig["OpenAI:APIKey"] ?? throw new InvalidOperationException("'OpenAI API Key' not found.");
         private static StringBuilder imageCompositePrompt = new StringBuilder();
 
         // The stream chat module using in text generation.

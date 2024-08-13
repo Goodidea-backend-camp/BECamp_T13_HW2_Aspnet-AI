@@ -1,12 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using BECamp_T13_HW2_Aspnet_AI.Data;
 using BECamp_T13_HW2_Aspnet_AI.Models;
-using BECamp_T13_HW2_Aspnet_AI.Services;
-using Mysqlx.Session;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
@@ -15,12 +15,12 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserContext _context;
-        private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
-        public UserController(UserContext context, IEmailSender emailSender)
+        public UserController(UserContext context, IConfiguration configuration)
         {
             _context = context;
-            _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -69,7 +69,9 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
                 return Unauthorized(new { Response = "Login failed. Password is incorrect." });
             }
 
-            return Ok(new { Response = "Login success." });
+            string jwtToken = CreateJwtToken(user);
+
+            return Ok(jwtToken);
         }
 
         [HttpPost("verify")]
@@ -151,5 +153,27 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
         }
 
+        private string CreateJwtToken(User user)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            SymmetricSecurityKey singInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                _configuration.GetSection("JWT:Token").Value));
+
+            SigningCredentials credentials = new SigningCredentials(singInKey, SecurityAlgorithms.HmacSha256Signature);
+
+            JwtSecurityToken token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: credentials
+            );
+
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
+        }
     }
 }
