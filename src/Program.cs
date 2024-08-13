@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using BECamp_T13_HW2_Aspnet_AI.Data;
 using BECamp_T13_HW2_Aspnet_AI.Models;
 using BECamp_T13_HW2_Aspnet_AI.Services;
@@ -36,7 +38,39 @@ builder.Services.AddScoped<IAIServices, OpenAIServices>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "BECamp_T13_HW2_Aspnet-AI",
+        Version = "v1",
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -58,6 +92,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllers();   // Transform the defalut route from single route(MVC) to attribute route(REST API).
+app.MapControllers();   // Transform the default route from single route(MVC) to attribute route(REST API).
 
 app.Run();

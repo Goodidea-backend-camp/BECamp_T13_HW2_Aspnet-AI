@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -10,10 +11,12 @@ namespace BECamp_T13_HW2_Aspnet_AI.Services
     public class EmailSender : IEmailSender
     {
         private Email _email { get; }
+        private readonly ILogger _logger;
 
-        public EmailSender(IOptions<Email> optionsAccessor)
+        public EmailSender(IOptions<Email> optionsAccessor, ILogger<EmailSender> logger)
         {
             _email = optionsAccessor.Value;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string message)
