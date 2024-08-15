@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>BECamp_T13_HW2_Aspnet_AI</RootNamespace>
     <UserSecretsId>848f4c3f-c22f-4fee-8030-db66344f74a2</UserSecretsId>
   </PropertyGroup>
 
