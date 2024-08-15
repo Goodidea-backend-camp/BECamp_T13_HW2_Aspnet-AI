@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BECamp_T13_HW2_Aspnet_AI.Models;
 using BECamp_T13_HW2_Aspnet_AI.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {

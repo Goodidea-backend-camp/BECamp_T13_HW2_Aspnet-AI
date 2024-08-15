@@ -10,18 +10,18 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration["MySQL:BECampT13HW2"] ?? throw new InvalidOperationException("Connection string 'UserContextConnection' not found.");
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 
 // To create a connection with MySQL by using EF Core context.
 builder.Services.AddDbContext<UserContext>(options =>
-    options.UseMySQL(connectionString)
-);
+    options.UseMySQL(connectionString));
 
 // To add Identity services to the container.
 builder.Services.AddAuthorization();
 
 // To activate Identity APIs.
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<UserContext>();
 
 // To confirm the email address and enables the user to log in.
@@ -81,6 +81,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
 
 // Map identity route.
 app.MapIdentityApi<IdentityUser>();
@@ -90,8 +96,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();   // Transform the default route from single route(MVC) to attribute route(REST API).
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+    
+app.MapRazorPages();
 
 app.Run();
