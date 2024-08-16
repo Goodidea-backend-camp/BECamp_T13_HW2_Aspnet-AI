@@ -1,10 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using BECamp_T13_HW2_Aspnet_AI.Models;
 using BECamp_T13_HW2_Aspnet_AI.Services;
-using System.Text.Json.Nodes;
 
 namespace BECamp_T13_HW2_Aspnet_AI.Controllers
 {
     [Route("/")]
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class AIAssistantController : ControllerBase
@@ -35,12 +37,10 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
         [HttpPost("replies")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> UserInputSpamCheck([FromBody] JsonObject body)
+        public async Task<ActionResult> UserInputSpamCheck(Prompt request)
         {
-            // Get the value from body which content-type is json.
-            string prompt = body["prompt"].ToString();
             // Wait for AI check if the nick name user input is spam or not.
-            string spamResponse = await _assistant.SpamCheck(prompt);
+            string spamResponse = await _assistant.SpamCheck(request.prompt);
             // The method automatically tranform the new object into json.
             return Ok(new { Response = spamResponse });
         }
@@ -64,12 +64,10 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
         [HttpPost("image")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> UserInputTextToImage([FromBody] JsonObject body)
+        public async Task<ActionResult> UserInputTextToImage(Prompt request)
         {
-            // Get the value from body which content-type is json.
-            string prompt = body["prompt"].ToString();
             // Wait for AI response a image uri.
-            string imageUriResponse = await _assistant.Visualize(prompt);
+            string imageUriResponse = await _assistant.Visualize(request.prompt);
             // Return a Uri by json format and let frontend open it with <img src="">.
             return Ok(new { Response = imageUriResponse });
         }
@@ -93,19 +91,16 @@ namespace BECamp_T13_HW2_Aspnet_AI.Controllers
         [HttpPost("roast")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> UserInputTextToSpeech([FromBody] JsonObject body)
+        public async Task<ActionResult> UserInputTextToSpeech(Prompt request)
         {
-            // Get the value from body which content-type is json.
-            string prompt = body["prompt"].ToString();
-
             // Check the prompt length is required length or not.
-            if (prompt.Length < 2 || prompt.Length > 50)
+            if (request.prompt.Length < 2 || request.prompt.Length > 50)
             {
                 return BadRequest(new { Response = "Required string length minimum 2 maximum 50" });
             }
 
             // Then wait for AI generate a speech binary and create a mp3 for writing in and response.
-            string pathOfMP3Response = await _assistant.TextToSpeech(prompt);
+            string pathOfMP3Response = await _assistant.TextToSpeech(request.prompt);
             // Return a path of mp3 by json format and let frontend open it with <a href="">.
             return Ok(new { Response = pathOfMP3Response });
         }

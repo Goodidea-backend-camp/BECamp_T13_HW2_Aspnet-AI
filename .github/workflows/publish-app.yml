@@ -1,0 +1,61 @@
+name: .NET publish
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  PROJECT_LOCATION: src/BECamp_T13_HW2_Aspnet-AI.csproj
+  ELASTIC_BEANSTALK_NAME: BECamp_T13_HW2_Aspnet-AI-host
+  ELASTIC_BEANSTALK_ENV_NAME: BECampT13HW2Aspnet-AI-host-env
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install dependencies
+        run: dotnet restore ${{ env.PROJECT_LOCATION }}
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore ${{ env.PROJECT_LOCATION }}
+
+      - name: Pack
+        run: |
+          dotnet publish ${{ env.PROJECT_LOCATION }} -c Release -o "${{ github.workspace }}/${{github.run_id}}"
+          cd ${{ github.run_id }}
+          zip -r ../${{ github.run_id }}.zip .
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-files
+          path: ${{ github.run_id }}.zip
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy
+        run: |
+          aws s3 cp "deploy-files/${{ github.run_id }}.zip" s3://elasticbeanstalk-ap-northeast-1-${{ secrets.AWS_ACCOUNT_ID }}/artifact/aspnet-ai-app/
+          aws elasticbeanstalk create-application-version --application-name ${{ env.ELASTIC_BEANSTALK_NAME }} --version-label ${{ github.run_id }} --description ${{ github.run_id }} --source-bundle S3Bucket="elasticbeanstalk-ap-northeast-1-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/aspnet-ai-app/${{ github.run_id }}.zip"
+          aws elasticbeanstalk update-environment --application-name ${{ env.ELASTIC_BEANSTALK_NAME }} --environment-name ${{ env.ELASTIC_BEANSTALK_ENV_NAME }} --version-label ${{ github.run_id }}
+          aws elasticbeanstalk wait environment-updated --application-name ${{ env.ELASTIC_BEANSTALK_NAME }} --environment-name ${{ env.ELASTIC_BEANSTALK_ENV_NAME }}

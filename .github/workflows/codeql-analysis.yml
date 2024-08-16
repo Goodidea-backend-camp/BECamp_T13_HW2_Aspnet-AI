@@ -15,23 +15,20 @@ on:
 jobs:
   analyze:
     name: analyze
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        language: ["csharp"]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       # Initializes CodeQL tools and creates a codebase for analysis.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
+          languages: "csharp"
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3

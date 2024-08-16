@@ -14,7 +14,7 @@ namespace BECamp_T13_HW2_Aspnet_AI
             IAIServices services = new OpenAIServices();
 
             string fuckYouResult = await services.SpamCheck("Fuck you!");
-            string helloWorldResult = await services.SpamCheck("Hello, world!");
+            string helloWorldResult = await services.SpamCheck("Hey Absalom!");
 
             try
             {
