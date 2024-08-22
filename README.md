@@ -37,7 +37,7 @@ git clone https://github.com/Goodidea-backend-camp/BECamp_T13_HW2_Aspnet-AI.git
 2. Install Dependencies: Navigate to the project directory and install the required dependencies using the package manager:
 
 ```
-cd src/
+cd BECamp_T13_HW2_Aspnet-AI/src/
 dotnet restore
 ```
 
@@ -51,7 +51,7 @@ dotnet user-secrets set "Email:Password" "YourEmailSendingPassword"
 dotnet user-secrets set "Email:Host" "YourEmailSendingHost"
 ```
 
-4. Build the project and run the Application: Once the dependencies are installed and the user secrets are configured, build the project and then run the application using the following command:
+4. Build and run the Application: Once the dependencies are installed and the user secrets are configured, build and then run the application using the following command:
 
 ```
 dotnet build
@@ -59,3 +59,14 @@ dotnet run
 ```
 
 5. Access the Application: Access the application through the provided URL or port number. You may need to configure additional settings based on your deployment environment.
+
+## Usage
+- Poem Generation: Send a POST request to `/roast` with a JSON body containing a keyword `prompt`.
+- Image Generation: Send a POST request to `/image` with a JSON body containing a keyword `prompt` and continue to add details as needed.
+- Spam Filter: Send a POST request to `/replies` with a JSON body containing a keyword `prompt`.
+
+## Deployment
+The project can be deployed using GitHub Actions to AWS. Ensure that the necessary secrets and environment variables are set up in your GitHub repository.
+
+## Contributions
+Contributions are welcome! Please fork the repository and submit a pull request.
